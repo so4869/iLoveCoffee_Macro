@@ -9,9 +9,23 @@ import java.util.List;
 
 import com.sun.jna.Native;
 import com.sun.jna.Structure;
+import com.sun.jna.platform.win32.BaseTSD.ULONG_PTR;
+import com.sun.jna.platform.win32.WinDef.DWORD;
+import com.sun.jna.platform.win32.WinDef.LONG;
+import com.sun.jna.platform.win32.WinUser.INPUT;
 import com.sun.jna.win32.StdCallLibrary;
 
 public class WindowUtil {
+	
+	public static final int MOUSEEVENTF_MOVE = 1;
+	public static final int MOUSEEVENTF_LEFTDOWN = 2;
+	public static final int MOUSEEVENTF_LEFTUP = 4;
+	public static final int MOUSEEVENTF_RIGHTDOWN = 8;
+	public static final int MOUSEEVENTF_RIGHTUP = 16;
+	public static final int MOUSEEVENTF_MIDDLEDOWN = 32;
+	public static final int MOUSEEVENTF_MIDDLEUP = 64;
+	public static final int MOUSEEVENTF_WHEEL = 2048;
+	
 	private static void listAllWindows() throws AWTException, IOException {
         final List<WindowInfo> inflList = new ArrayList<WindowInfo>();
         final List<Integer> order = new ArrayList<Integer>();
@@ -128,5 +142,22 @@ public class WindowUtil {
         public String getTitle() {
         	return title;
         }
+    }
+    
+    public static void actionMouse(int x, int y, int flags) { 
+    	INPUT input = new INPUT();
+
+		input.type = new DWORD(INPUT.INPUT_MOUSE);
+		input.input.setType("mi");
+		if (x != -1) {
+			input.input.mi.dx = new LONG(x);
+		}
+		if (y != -1) {
+			input.input.mi.dy = new LONG(y);
+		}
+		input.input.mi.time = new DWORD(0);
+		input.input.mi.dwExtraInfo = new ULONG_PTR(0);
+		input.input.mi.dwFlags = new DWORD(flags);
+		com.sun.jna.platform.win32.User32.INSTANCE.SendInput(new DWORD(1), new INPUT[] { input }, input.size());
     }
 }
